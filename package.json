@@ -1,0 +1,19 @@
+{
+  "name": "ex-nihilo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "EX NIHILO — a scroll-driven cinematic journey through the birth of the universe.",
+  "scripts": {
+    "dev": "vite --host --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host --port 5173",
+    "start": "vite --host --port 5173"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  }
+}

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050308" />
+    <title>EX NIHILO — the birth of everything</title>
+    <meta
+      name="description"
+      content="EX NIHILO — a scroll-driven cinematic journey through the birth of the universe. Scroll to begin time."
+    />
+
+    <!-- Always begin the journey at t=0, even after a refresh. -->
+    <script>
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    </script>
+
+    <!-- Critical inline styles: paint a black void + preloader instantly, so the
+         page is never a flash of unstyled white before the app CSS/JS arrive. -->
+    <style>
+      html, body { margin: 0; height: 100%; background: #050308; overflow-x: hidden; }
+      #webgl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
+      #preload {
+        position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center;
+        background: radial-gradient(120% 120% at 50% 48%, #0b0714 0%, #050308 70%);
+        color: #efeafb; font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        transition: opacity 1s ease, visibility 1s ease;
+      }
+      #preload[data-done="true"] { opacity: 0; visibility: hidden; }
+      .pl { display: flex; flex-direction: column; align-items: center; gap: 34px; }
+      .pl__orb { position: relative; width: 128px; height: 128px; display: grid; place-items: center; }
+      .pl__seed {
+        width: 8px; height: 8px; border-radius: 50%; background: #fff;
+        box-shadow: 0 0 14px 4px rgba(183,155,255,.9), 0 0 46px 12px rgba(120,90,230,.5), 0 0 104px 34px rgba(80,50,180,.28);
+        animation: plpulse 3.6s ease-in-out infinite;
+      }
+      .pl__ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(183,155,255,.16); }
+      .pl__ring::after {
+        content: ''; position: absolute; inset: -1px; border-radius: 50%;
+        border: 1px solid transparent; border-top-color: rgba(183,155,255,.85);
+        animation: plspin 1.5s linear infinite;
+      }
+      .pl__ring--2 { inset: 18px; opacity: .5; }
+      .pl__ring--2::after { animation-duration: 2.4s; animation-direction: reverse; border-top-color: rgba(120,90,230,.7); }
+      .pl__label { font-size: 11px; letter-spacing: .55em; text-transform: uppercase; color: rgba(238,232,250,.5); text-indent: .55em; }
+      .pl__label span { animation: pldots 1.6s steps(4) infinite; }
+      @keyframes plpulse { 0%,100% { transform: scale(.65); opacity: .7; } 50% { transform: scale(1.55); opacity: 1; } }
+      @keyframes plspin { to { transform: rotate(360deg); } }
+      @keyframes pldots { 0% { opacity: 0; } 50%,100% { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) {
+        .pl__seed, .pl__ring::after { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Instant preloader (inline-styled, no external deps). Removed once warm. -->
+    <div id="preload">
+      <div class="pl">
+        <div class="pl__orb">
+          <span class="pl__ring"></span>
+          <span class="pl__ring pl__ring--2"></span>
+          <span class="pl__seed"></span>
+        </div>
+        <div class="pl__label">shaping the void<span>…</span></div>
+      </div>
+    </div>
+
+    <!-- Deep scroll track: the scrollbar IS cosmic time. -->
+    <div id="scroll-track" aria-hidden="true"></div>
+
+    <!-- WebGL canvas lives here, fixed behind everything. -->
+    <canvas id="webgl"></canvas>
+
+    <!-- HUD: reads like a scientific instrument, not a website. -->
+    <div id="hud" class="hud" data-hidden="true">
+      <button id="logo" class="hud__corner hud__corner--tl" aria-label="About EX NIHILO">
+        <span class="hud__label">EX&nbsp;NIHILO</span>
+        <span class="hud__sub">from nothing · <span class="hud__hint">the story ↗</span></span>
+      </button>
+
+      <div class="hud__corner hud__corner--tr">
+        <div class="clock">
+          <span class="clock__t" id="clock-value">t = 0</span>
+          <span class="clock__epoch" id="clock-epoch">the quantum dark</span>
+        </div>
+      </div>
+
+      <button id="mute" class="mute" aria-label="Toggle sound" aria-pressed="false">
+        <span class="mute__bars" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="mute__word">SOUND</span>
+      </button>
+
+      <div class="progress" aria-hidden="true">
+        <div class="progress__rail"><div class="progress__fill" id="progress-fill"></div></div>
+        <div class="progress__acts" id="progress-acts"></div>
+      </div>
+    </div>
+
+    <!-- Narration overlay, injected + driven by JS. -->
+    <div id="narration" class="narration" aria-live="polite"></div>
+
+    <!-- Entry veil: the deliberate, quiet doorway before sound + time begin. -->
+    <div id="veil" class="veil">
+      <div class="veil__inner">
+        <h1 class="veil__title" aria-label="Ex Nihilo">
+          <span class="veil__word" style="--i:0">EX</span>
+          <span class="veil__word" style="--i:1">NIHILO</span>
+        </h1>
+        <p class="veil__tag">Before light. Before time. Before you.</p>
+        <button id="begin" class="begin">
+          <span class="begin__ring"></span>
+          <span class="begin__label">Begin</span>
+        </button>
+        <p class="veil__note">
+          <span id="veil-status">preparing the void…</span>
+          <br />best with sound &amp; full screen
+        </p>
+      </div>
+    </div>
+
+    <!-- Story / meaning overlay, opened from the logo. -->
+    <div id="about" class="about" data-open="false" aria-hidden="true">
+      <div class="about__scrim" id="about-scrim"></div>
+      <article class="about__panel" role="dialog" aria-modal="true" aria-label="About EX NIHILO">
+        <button id="about-close" class="about__close" aria-label="Close">✕</button>
+        <p class="about__eyebrow"><span data-r="0">ex&nbsp;nihilo</span> <em data-r="1">/ˌeks ˈniː.hɪ.loʊ/</em> <span data-r="2">— Latin</span></p>
+        <h2 class="about__title"><span data-r="1">out of</span> <em data-r="2">nothing</em></h2>
+        <div class="about__body">
+          <p data-r="3">
+            Everything there is — every star, every atom, the screen you are reading
+            this on — began as less than a point. No space around it. No time before it.
+          </p>
+          <p data-r="4">
+            <em>EX NIHILO</em> compresses those first 13.8&nbsp;billion years into a single
+            scroll. Here, the scrollbar <em>is</em> time: drag it forward and you pull the
+            universe into being — the Big&nbsp;Bang, the first light, the first stars,
+            the slow turning of galaxies, and their long fall toward one another.
+          </p>
+          <p data-r="5">
+            It is rendered live — light, sound, and mathematics, computed in the moment,
+            never a video. The sound you hear is generated as you go; the clock in the
+            corner counts real cosmic time.
+          </p>
+          <p class="about__acts" data-r="6">
+            I · the quantum dark&nbsp;&nbsp; II · let there be&nbsp;&nbsp; III · inflation&nbsp;&nbsp;
+            IV · the particle era&nbsp;&nbsp; V · first light&nbsp;&nbsp; VI · first stars&nbsp;&nbsp;
+            VII · galaxies&nbsp;&nbsp; VIII · collisions&nbsp;&nbsp; IX · you are here
+          </p>
+        </div>
+        <p class="about__foot" data-r="7">
+          A little of that first light is still falling on us today. Scroll, and let there be.
+        </p>
+      </article>
+    </div>
+
+    <!-- Graceful fallback for no-WebGL environments. -->
+    <div id="fallback" class="fallback" hidden>
+      <div class="fallback__stars"></div>
+      <div class="fallback__content">
+        <h1>EX NIHILO</h1>
+        <p>
+          This piece renders the birth of the universe in real-time WebGL — and your
+          browser can't reach the graphics layer it needs.
+        </p>
+        <p class="fallback__hint">
+          Try the latest Chrome, Edge, or Firefox on a device with hardware acceleration
+          enabled, and the cosmos will open up.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
