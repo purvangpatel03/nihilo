@@ -106,16 +106,19 @@ function boot() {
     ui.begin();
     const draw = () => {
       cosmos.warm();
+      exp._onResize(); // re-measure in case the viewport settled after load
       exp.elapsed = t;
       exp.gradePass.uniforms.uTime.value = t;
       cosmos.update(p, t, 0.016);
       ui.update(p);
+      ui.setBgLuminance(cosmos.bgLum, 1);
       exp.render();
       hidePreloader();
       if (params.has('about')) openAbout();
     };
-    setTimeout(draw, 60);
-    setTimeout(draw, 400);
+    setTimeout(draw, 80);
+    setTimeout(draw, 450);
+    setTimeout(draw, 950);
     return;
   }
 
@@ -128,6 +131,7 @@ function boot() {
     cosmos.update(p, exp.elapsed, exp.dt);
     audio.render(p, exp.dt);
     ui.update(p);
+    ui.setBgLuminance(cosmos.bgLum, exp.dt);
     exp.render();
   }
   frame();

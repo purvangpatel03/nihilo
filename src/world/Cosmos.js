@@ -71,16 +71,24 @@ export default class Cosmos {
       { p: 0.0, v: 13 }, { p: 0.11, v: 15 }, { p: 0.16, v: 17 }, { p: 0.2, v: 10 },
       { p: 0.26, v: 16 }, { p: 0.32, v: 30 }, { p: 0.42, v: 33 }, { p: 0.45, v: 32 },
       { p: 0.51, v: 30 }, { p: 0.57, v: 48 }, { p: 0.69, v: 60 },
-      { p: 0.81, v: 98 }, { p: 0.92, v: 152 }, { p: 1.0, v: 168 },
+      { p: 0.81, v: 72 }, { p: 0.885, v: 58 }, { p: 0.92, v: 150 }, { p: 1.0, v: 168 },
     ];
     this.camY = [
       { p: 0.0, v: 0 }, { p: 0.45, v: 0 }, { p: 0.57, v: 7 }, { p: 0.69, v: 18 },
-      { p: 0.81, v: 28 }, { p: 0.92, v: 12 }, { p: 1.0, v: 8 },
+      { p: 0.81, v: 11 }, { p: 0.885, v: 9 }, { p: 0.92, v: 11 }, { p: 1.0, v: 8 },
     ];
     this.bloomKeys = [
       { p: 0.0, v: 0.5 }, { p: 0.115, v: 0.6 }, { p: 0.16, v: 1.15 }, { p: 0.22, v: 0.85 },
       { p: 0.32, v: 0.7 }, { p: 0.45, v: 0.68 }, { p: 0.57, v: 0.95 }, { p: 0.69, v: 0.88 },
       { p: 0.81, v: 0.9 }, { p: 0.92, v: 0.7 }, { p: 1.0, v: 0.6 },
+    ];
+
+    // Estimated screen brightness (0 = black void, 1 = white) so the HUD/narration
+    // text can flip light↔dark and stay legible over bright scenes.
+    this.lumKeys = [
+      { p: 0.0, v: 0.05 }, { p: 0.2, v: 0.14 }, { p: 0.27, v: 0.26 }, { p: 0.34, v: 0.1 },
+      { p: 0.45, v: 0.16 }, { p: 0.5, v: 0.6 }, { p: 0.55, v: 0.44 }, { p: 0.6, v: 0.14 },
+      { p: 0.69, v: 0.12 }, { p: 0.85, v: 0.16 }, { p: 0.92, v: 0.34 }, { p: 0.97, v: 0.44 }, { p: 1.0, v: 0.36 },
     ];
 
     this.bgKeys = [
@@ -131,6 +139,9 @@ export default class Cosmos {
 
     // proximity to the detonation (for flash / shake / chroma)
     const bangProx = Math.exp(-Math.pow((p - BANG_AT) * 68, 2));
+
+    // background brightness estimate for adaptive text contrast
+    this.bgLum = Math.min(1, Math.max(kf(this.lumKeys, p), bangProx));
 
     // ---- scenes ----
     for (const e of this.entries) {

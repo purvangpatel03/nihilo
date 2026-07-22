@@ -331,6 +331,27 @@ button.hud__corner:hover .hud__label {
   bottom: auto;
 }
 
+/* ---------------- Physics caption (documentary layer) ---------------- */
+.caption {
+  position: fixed;
+  top: 13vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 22;
+  max-width: min(80vw, 620px);
+  text-align: center;
+  font-family: var(--mono);
+  font-size: clamp(10px, 1.15vw, 12.5px);
+  letter-spacing: 0.16em;
+  line-height: 1.8;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease), color 0.5s var(--ease);
+  text-wrap: balance;
+}
+
 /* ---------------- Entry veil ---------------- */
 .veil {
   position: fixed;
@@ -342,6 +363,10 @@ button.hud__corner:hover .hud__label {
   background:
     radial-gradient(120% 120% at 50% 48%, rgba(6, 3, 10, 0.42) 0%, rgba(5, 3, 8, 0.86) 58%, #050308 100%);
   transition: opacity 1.6s var(--ease), visibility 1.6s var(--ease);
+  /* the doorway is always on the dark void — keep its text light */
+  --ink: #f4eefb;
+  --ink-dim: rgba(238, 232, 250, 0.52);
+  --ink-faint: rgba(238, 232, 250, 0.26);
 }
 .veil[data-gone='true'] {
   opacity: 0;
@@ -587,6 +612,10 @@ button.hud__corner:hover .hud__label {
   display: grid;
   place-items: center;
   pointer-events: none;
+  /* always light text — the story sits on its own dark scrim */
+  --ink: #f4eefb;
+  --ink-dim: rgba(238, 232, 250, 0.62);
+  --ink-faint: rgba(238, 232, 250, 0.34);
 }
 .about[data-open='true'] {
   pointer-events: auto;

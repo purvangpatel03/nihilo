@@ -41,7 +41,8 @@ npm run build && npm run preview   # also served at http://localhost:5173
 5. **First Light** — recombination: the cosmic microwave background clears and shines.
 6. **First Stars** — gravity gathers the dark until it catches fire.
 7. **Galaxies** — a hundred billion suns learning to turn together.
-8. **Collisions** — two galaxies falling toward one another, tidal tails and all.
+8. **Collisions** — a real restricted N-body merger: two galaxies fall together
+   under gravity, graze, tear tidal tails, and coalesce into one remnant.
 9. **You Are Here** — the pull-back to a pale blue dot.
 
 ## Controls & details
@@ -60,6 +61,12 @@ npm run build && npm run preview   # also served at http://localhost:5173
   that owns vignette, film grain, chromatic aberration and the Big-Bang flash).
 - **Everything is GPU particles / shaders** — simplex + curl noise, additive
   point systems, a spiral-galaxy generator, and a CMB temperature-map shader.
+- **The collision is simulated, not faked** — a restricted N-body run (gravity +
+  dynamical friction) is baked to a float texture at load and replayed by scroll,
+  so it scrubs backward and forward through the real encounter.
+- **Adaptive text** — the HUD, narration and a documentary "physics caption"
+  layer sense the scene's brightness and fade between light and dark ink so the
+  type never disappears against the Big-Bang flash or the bright first light.
 - **Audio** is 100% generated at runtime (no samples): an evolving six-voice
   drone chord, a swelling sub, filtered "air", sparkle bells at star birth, and
   a Big-Bang impact built from a pitch-dropping boom + a reverberant noise roar.

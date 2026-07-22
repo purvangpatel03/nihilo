@@ -174,3 +174,17 @@ export const BEATS = [
     align: 'center',
   },
 ];
+
+// A quieter documentary layer that runs above the poetic beats — the actual
+// physics of each epoch, so the scroll teaches as well as moves.
+export const CAPTIONS = [
+  { start: 0.015, end: 0.1, text: 'a region smaller than an atom · holding all the energy there will ever be' },
+  { start: 0.205, end: 0.305, text: 'inflation · in 10⁻³² s space swells by a factor of 10²⁶' },
+  { start: 0.335, end: 0.405, text: 'a plasma of quarks and gluons cools · they bind into protons and neutrons' },
+  { start: 0.405, end: 0.455, text: 'nucleosynthesis · the first nuclei — three-quarters hydrogen, one-quarter helium' },
+  { start: 0.47, end: 0.565, text: 'electrons fall into orbit · the first atoms form · the plasma fog turns transparent' },
+  { start: 0.59, end: 0.685, text: 'gravity draws cold hydrogen into knots until fusion ignites — the first starlight' },
+  { start: 0.71, end: 0.805, text: 'stars stream along filaments of dark matter · assembling the first galaxies' },
+  { start: 0.83, end: 0.915, text: 'over billions of years two galaxies spiral in · gas shocks and blazes with new stars' },
+  { start: 0.935, end: 0.995, text: 'the heavy atoms in your body were forged inside stars · you are the cosmos, aware of itself' },
+];

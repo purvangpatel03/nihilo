@@ -1,5 +1,5 @@
-import { ACTS, BEATS, clockFor, actAt } from '../core/Timeline.js';
-import { window01, clamp } from '../lib/math.js';
+import { ACTS, BEATS, CAPTIONS, clockFor, actAt } from '../core/Timeline.js';
+import { window01, clamp, lerp, smoothstep, damp } from '../lib/math.js';
 
 // Owns every pixel of DOM chrome: the entry veil, the instrument HUD,
 // the narration beats, the mute control, the scroll cue and the loop-back.
@@ -20,11 +20,21 @@ export default class Interface {
     this._lastEpoch = '';
     this._lastAct = '';
     this._started = false;
+    this._lumDisp = 0.05; // smoothed background brightness for text contrast
+    this._rootStyle = document.documentElement.style;
 
     this._buildActLabel();
     this._buildBeats();
+    this._buildCaption();
     this._buildCue();
     this._buildLoop();
+  }
+
+  _buildCaption() {
+    this.caption = document.createElement('div');
+    this.caption.className = 'caption';
+    document.body.appendChild(this.caption);
+    this._lastCaption = -1;
   }
 
   _buildActLabel() {
@@ -103,6 +113,21 @@ export default class Interface {
     }, 2600);
   }
 
+  // Adaptive text contrast: as the scene brightens (Big-Bang flash, first
+  // light, the final beam) the chrome fades from light ink to dark ink so it
+  // never disappears against a white background. Smoothed for a soft cross-fade.
+  setBgLuminance(lum, dt = 0.016) {
+    this._lumDisp = damp(this._lumDisp, lum ?? 0.05, 9, dt);
+    const t = smoothstep(0.4, 0.62, this._lumDisp);
+    const r = Math.round(lerp(244, 10, t));
+    const g = Math.round(lerp(238, 9, t));
+    const b = Math.round(lerp(251, 18, t));
+    const s = this._rootStyle;
+    s.setProperty('--ink', `rgb(${r},${g},${b})`);
+    s.setProperty('--ink-dim', `rgba(${r},${g},${b},0.62)`);
+    s.setProperty('--ink-faint', `rgba(${r},${g},${b},0.34)`);
+  }
+
   update(p) {
     // clock
     const { value, epoch } = clockFor(p);
@@ -139,6 +164,22 @@ export default class Interface {
       el.style.filter = `blur(${(inv * 7).toFixed(2)}px)`;
       el.style.transform = `translateY(${(inv * 12).toFixed(2)}px) scale(${(0.985 + a * 0.015).toFixed(4)})`;
     }
+
+    // physics caption layer (documentary voice, above the poetic beats)
+    let capA = 0, capIdx = -1;
+    for (let i = 0; i < CAPTIONS.length; i++) {
+      const c = CAPTIONS[i];
+      if (p >= c.start && p <= c.end) {
+        capA = window01(p, c.start, c.end, 0.03);
+        capIdx = i;
+        break;
+      }
+    }
+    if (capIdx !== this._lastCaption && capIdx >= 0) {
+      this.caption.textContent = CAPTIONS[capIdx].text;
+      this._lastCaption = capIdx;
+    }
+    this.caption.style.opacity = capA.toFixed(3);
 
     // scroll cue: only while at the very start
     if (this._started) {
