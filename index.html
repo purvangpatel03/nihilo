@@ -172,5 +172,126 @@
     </div>
 
     <script type="module" src="/src/main.js"></script>
+  <!-- BEGIN purvang-crosslink -->
+<!-- ===================================================================
+     Cross-site nav. Self-contained: no framework, no build step, no
+     network. Paste before </body> on any of the sites and set
+     data-psx-current to the key of the page it is on, so that entry
+     renders as "you are here" instead of a link.
+
+     Source of truth: Purvang/shared/crosslink.html. Edit there, then
+     re-run Purvang/shared/sync-crosslink.sh to push it everywhere.
+     =================================================================== -->
+<div class="psx" data-psx-current="nihilo">
+  <nav class="psx__panel" id="psx-panel" aria-label="Other work by Purvang Suvagiya" hidden>
+    <a class="psx__home" href="https://purvang.vercel.app">
+      <span class="psx__home-name">Purvang Suvagiya</span>
+      <span class="psx__home-role">software engineer &middot; mobile &amp; AI</span>
+    </a>
+    <ul class="psx__list">
+      <li data-psx-key="anima"><a href="https://purvang-anima.vercel.app"><b>Anima</b><span>a living organism, no libraries</span></a></li>
+      <li data-psx-key="nihilo"><a href="https://purvang-nihilo.vercel.app"><b>Ex Nihilo</b><span>scroll the universe into existence</span></a></li>
+      <li data-psx-key="halcyon"><a href="https://purvang-halcyon.vercel.app"><b>Halcyon</b><span>a live aurora, and an intelligence core</span></a></li>
+      <li data-psx-key="trekias"><a href="https://trekias.com"><b>Trekias</b><span>the product I founded &middot; 5,000+ users</span></a></li>
+    </ul>
+  </nav>
+
+  <button class="psx__tab" type="button" aria-expanded="false" aria-controls="psx-panel">
+    <span class="psx__mark" aria-hidden="true">PS<i>/</i></span>
+    <span class="psx__label">more work</span>
+  </button>
+</div>
+
+<style>
+  .psx {
+    position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom));
+    z-index: 9999; display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  .psx a, .psx button { -webkit-tap-highlight-color: transparent; }
+
+  .psx__tab {
+    display: inline-flex; align-items: center; gap: 9px;
+    min-height: 38px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,.16); background: rgba(10,10,12,.62);
+    color: rgba(255,255,255,.82); font: inherit; font-size: 10.5px;
+    letter-spacing: .14em; text-transform: uppercase;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: border-color .25s ease, color .25s ease, background .25s ease;
+  }
+  .psx__tab:hover, .psx__tab:focus-visible { border-color: rgba(255,138,61,.65); color: #fff; background: rgba(10,10,12,.8); }
+  .psx__tab:focus-visible { outline: 2px solid rgba(255,138,61,.9); outline-offset: 3px; }
+  .psx__mark { font-weight: 700; letter-spacing: .04em; }
+  .psx__mark i { color: #ff8a3d; font-style: normal; }
+  .psx__label { opacity: .72; }
+
+  .psx__panel {
+    width: min(19rem, calc(100vw - 32px)); overflow: hidden;
+    border: 1px solid rgba(255,255,255,.14); border-radius: 14px;
+    background: rgba(10,10,12,.88); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 18px 50px rgba(0,0,0,.55);
+    transform-origin: bottom left;
+    animation: psx-in .28s cubic-bezier(.2,.8,.25,1) both;
+  }
+  @keyframes psx-in { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+
+  .psx__home { display: block; padding: 14px 16px 12px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .psx__home-name { display: block; color: #fff; font-size: 13px; letter-spacing: .02em; }
+  .psx__home-role { display: block; margin-top: 3px; color: rgba(255,255,255,.5); font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase; }
+  .psx__home:hover .psx__home-name, .psx__home:focus-visible .psx__home-name { color: #ff8a3d; }
+
+  .psx__list { margin: 0; padding: 6px; list-style: none; }
+  .psx__list a {
+    display: block; padding: 9px 10px; border-radius: 9px; text-decoration: none;
+    transition: background .2s ease;
+  }
+  .psx__list a:hover, .psx__list a:focus-visible { background: rgba(255,255,255,.07); }
+  .psx__list a:focus-visible { outline: 2px solid rgba(255,138,61,.9); outline-offset: -2px; }
+  .psx__list b { display: block; color: rgba(255,255,255,.92); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+  .psx__list a:hover b, .psx__list a:focus-visible b { color: #ff8a3d; }
+  .psx__list span { display: block; margin-top: 2px; color: rgba(255,255,255,.46); font-size: 10px; line-height: 1.45; letter-spacing: .02em; }
+
+  /* the page you are already on is shown, but inert */
+  .psx__list li[data-psx-here] a { pointer-events: none; }
+  .psx__list li[data-psx-here] b { color: rgba(255,255,255,.4); }
+  .psx__list li[data-psx-here] b::after { content: " — you are here"; color: rgba(255,138,61,.7); font-weight: 400; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .psx__panel { animation: none; }
+    .psx__tab { transition: none; }
+  }
+  @media print { .psx { display: none; } }
+</style>
+
+<script>
+  (function () {
+    var root = document.querySelector('.psx');
+    if (!root) return;
+    var tab = root.querySelector('.psx__tab');
+    var panel = root.querySelector('.psx__panel');
+
+    // mark the current site so it does not link to itself
+    var current = root.getAttribute('data-psx-current');
+    var here = root.querySelector('[data-psx-key="' + current + '"]');
+    if (here) here.setAttribute('data-psx-here', '');
+
+    function setOpen(open) {
+      panel.hidden = !open;
+      tab.setAttribute('aria-expanded', String(open));
+    }
+    tab.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setOpen(panel.hidden);
+    });
+    document.addEventListener('click', function (e) {
+      if (!panel.hidden && !root.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !panel.hidden) { setOpen(false); tab.focus(); }
+    });
+  })();
+</script>
+<!-- END purvang-crosslink -->
   </body>
 </html>
