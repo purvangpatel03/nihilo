@@ -3,6 +3,12 @@ export function createExperience(THREE, mode) {
     const root = document.documentElement;
     const reduceQuery = matchMedia('(prefers-reduced-motion: reduce)');
     let paused = reduceQuery.matches, frameId = 0, lastY = scrollY, lastTime = 0;
+    // Static mode schedules one frame per input, so paused motion does not keep
+    // the GPU drawing an identical scene at the display refresh rate.
+    function requestFrame() {
+        if (!frameId && !document.hidden)
+            frameId = requestAnimationFrame(frame);
+    }
     let scrollImpulse = 0, hop = 0, hopV = 0, pointer = { x: 0, y: 0 }, interactions = 0;
     const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
     const mix = (a, b, t) => a + (b - a) * t;
@@ -36,6 +42,7 @@ export function createExperience(THREE, mode) {
         buttons.forEach(b => { b.setAttribute('aria-pressed', String(paused)); b.textContent = paused ? 'Motion off' : 'Motion on'; });
         filmButtons.forEach(b => { b.disabled = paused; b.textContent = paused ? 'Motion is off' : manualFilmPaused ? 'Play film ↗' : 'Pause film Ⅱ'; });
         syncVideos();
+        requestFrame();
     }
     buttons.forEach(b => b.addEventListener('click', () => { paused = !paused; motionState(); }));
     reduceQuery.addEventListener('change', e => { paused = e.matches; motionState(); });
@@ -55,6 +62,7 @@ export function createExperience(THREE, mode) {
                 hopV = clamp(hopV + clamp(delta * .075, -4, 4), -14, 14);
         }
         lastY = scrollY;
+        requestFrame();
     }, { passive: true });
     const visitLabel = document.querySelector('[data-visits]');
     const blooms = [];
@@ -76,6 +84,7 @@ export function createExperience(THREE, mode) {
                 blooms.shift().remove();
         }
         hopV = -4;
+        requestFrame();
     }));
     document.querySelector('[data-download]')?.addEventListener('click', () => {
         const visited = steps.filter(x => x.getBoundingClientRect().top < innerHeight).length;
@@ -173,6 +182,7 @@ export function createExperience(THREE, mode) {
         if (title)
             title.textContent = b.dataset.title;
         hopV = -4;
+        requestFrame();
     }));
     function resize() { width = innerWidth; height = innerHeight; steps.forEach(s => { if (width < 801)
         s.setAttribute('aria-hidden', 'true');
@@ -181,12 +191,12 @@ export function createExperience(THREE, mode) {
         renderer.setSize(width, height);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
-    } }
+    } requestFrame(); }
     addEventListener('resize', resize, { passive: true });
     resize();
     let active = -1;
     function frame(now) {
-        frameId = requestAnimationFrame(frame);
+        frameId = 0;
         const dt = Math.min((now - lastTime) / 16.667, 2) || 1;
         lastTime = now;
         const total = Math.max(1, document.documentElement.scrollHeight - height);
@@ -243,14 +253,11 @@ export function createExperience(THREE, mode) {
             object.scale.setScalar(loc.s / height * viewH);
             const time = paused ? 4 : now * .001;
             modelUpdate(time, p, choice, paused ? 0 : scrollImpulse, paused ? { x: 0, y: 0 } : pointer);
-            if (!paused || Math.abs(scrollImpulse) > .1 || now < 1000)
-                renderer.render(scene, camera);
-            // Static rendering must still follow native scrolling and stage position.
-            if (paused)
-                renderer.render(scene, camera);
+            renderer.render(scene, camera);
         }
         if (fallback && !fallback.hidden) {
-            fallback.style.transform = `translate3d(${loc.x}px,${loc.y + hop}px,0)`;
+            fallback.style.margin = '0';
+            fallback.style.transform = `translate3d(${loc.x - loc.s}px,${loc.y + hop - loc.s}px,0)`;
             fallback.style.width = fallback.style.height = `${loc.s * 2}px`;
         }
         scrollImpulse *= .88;
@@ -259,18 +266,21 @@ export function createExperience(THREE, mode) {
             return;
         } const r = el.parentElement.getBoundingClientRect(); if (r.bottom > 0 && r.top < height)
             el.style.transform = `translate3d(0,${clamp(-r.top * .13, -100, 100)}px,0) scale(1.12)`; });
+        if (!paused)
+            requestFrame();
     }
     document.addEventListener('visibilitychange', () => { syncVideos(); if (document.hidden) {
         cancelAnimationFrame(frameId);
+        frameId = 0;
         audioContext?.suspend();
     }
     else {
         lastTime = performance.now();
-        frameId = requestAnimationFrame(frame);
+        requestFrame();
         if (audioOn)
             audioContext?.resume();
     } });
-    requestAnimationFrame(frame);
+    requestFrame();
 }
 function buildGravity(T, g, renderer, scene) {
     const env = document.createElement('canvas');
