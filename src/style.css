@@ -139,7 +139,7 @@ button.hud__corner:hover .hud__hint {
   opacity: 1;
 }
 button.hud__corner:hover .hud__label {
-  color: #fff;
+  color: var(--ink);
 }
 .hud__corner--tr {
   top: var(--hud-gap);
@@ -803,7 +803,30 @@ html[data-epoch=collision] .caption{top:17vh;left:6vw;transform:none;text-align:
 .cosmic-credits>a{color:var(--ink);font:12px var(--mono);text-decoration:none;letter-spacing:.04em}
 .cosmic-credits>span{font:7px var(--mono);color:var(--ink-dim)}
 .fallback__maker{display:inline-block;margin-top:30px;color:#cdb8ff;font:12px var(--mono);text-decoration:none}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #b79bff;outline-offset:6px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:6px}
+
+/* Actual frame luminance sets ink independently for words and scene controls.
+   Opaque black/white avoids low-contrast intermediate colors; the fine opposite
+   edge protects letter shapes over small bright stars and mixed backgrounds.
+   The entry veil and dark dialogs retain their own palette. */
+.scene-ink {
+  --scene-ink: #fff;
+  --scene-edge: rgba(0, 0, 0, 0.9);
+  --ink: var(--scene-ink);
+  --ink-dim: var(--scene-ink);
+  --ink-faint: var(--scene-ink);
+  --accent: var(--scene-ink);
+  color: var(--scene-ink);
+  text-shadow: -0.5px 0 var(--scene-edge), 0.5px 0 var(--scene-edge),
+    0 -0.5px var(--scene-edge), 0 0.5px var(--scene-edge),
+    0 1px 5px var(--scene-edge);
+}
+.scene-ink[data-ink='dark'] {
+  --scene-ink: #000;
+  --scene-edge: rgba(255, 255, 255, 0.85);
+}
+.scene-ink, .scene-ink * { transition-property: opacity, transform, border-color; }
+.hud__hint { opacity: 0.85; }
 html[data-motion=reduced] .beat__word{transform:none!important;filter:none!important;opacity:1!important}
 html[data-motion=reduced] *,html[data-motion=reduced] *:before,html[data-motion=reduced] *:after{animation:none!important;transition:none!important}
 @media(max-width:750px){

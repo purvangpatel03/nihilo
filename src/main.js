@@ -4,6 +4,7 @@ import Experience from './core/Experience.js';
 import Scroll from './core/Scroll.js';
 import Interface from './ui/Interface.js';
 import Observatory from './ui/Observatory.js';
+import AdaptiveContrast from './ui/AdaptiveContrast.js';
 import AudioEngine from './audio/AudioEngine.js';
 import Cosmos from './world/Cosmos.js';
 if ('scrollRestoration' in history)
@@ -47,6 +48,7 @@ function boot() {
     function wake() { if (!raf && !document.hidden && !failed)
         raf = requestAnimationFrame(frame); }
     const observatory = new Observatory({ scroll, experience: exp, onMotion: () => wake(), onWake: wake });
+    const contrast = new AdaptiveContrast(canvas);
     window.__exnihilo = { exp, audio, cosmos, scroll, ui, observatory };
     document.documentElement.classList.add('is-locked');
     document.body.classList.add('is-locked');
@@ -117,9 +119,9 @@ function boot() {
         cosmos.update(p, exp.elapsed, exp.dt);
         audio.render(p, exp.dt);
         ui.update(p);
-        ui.setBgLuminance(cosmos.bgLum, observatory.reduced ? 1 : exp.dt);
         observatory.update(p, scroll.velocity);
         exp.render();
+        contrast.update(p, performance.now(), observatory.reduced);
         if (!observatory.reduced)
             wake();
     }

@@ -30,6 +30,8 @@ Production build:
 npm run build && npm run preview   # also served at http://localhost:5173
 ```
 
+Run the adaptive contrast checks with `npm test`.
+
 ---
 
 ## The nine acts
@@ -64,9 +66,12 @@ npm run build && npm run preview   # also served at http://localhost:5173
 - **The collision is simulated, not faked** — a restricted N-body run (gravity +
   dynamical friction) is baked to a float texture at load and replayed by scroll,
   so it scrubs backward and forward through the real encounter.
-- **Adaptive text** — the HUD, narration and a documentary "physics caption"
-  layer sense the scene's brightness and fade between light and dark ink so the
-  type never disappears against the Big-Bang flash or the bright first light.
+- **Adaptive text** — a small, throttled sample of the completed WebGL frame
+  measures local relative luminance for narration words, captions, HUD, journey
+  controls and end credits. Each chooses opaque black or white ink, with a small
+  hysteresis band to prevent flicker and a subtle opposite edge for scattered
+  stars. Scroll jumps and reduced-motion stills update immediately. Dark dialogs
+  keep their own palette.
 - **Audio** is 100% generated at runtime (no samples): an evolving six-voice
   drone chord, a swelling sub, filtered "air", sparkle bells at star birth, and
   a Big-Bang impact built from a pitch-dropping boom + a reverberant noise roar.
@@ -74,6 +79,9 @@ npm run build && npm run preview   # also served at http://localhost:5173
   downgrade, and a graceful non-WebGL fallback.
 - **Type:** Fraunces (display) + Space Mono (instrument HUD), vendored locally in
   `public/fonts` so the piece is fully self-contained.
+- **Favicon:** a generated violet singularity/spiral mark, supplied as a multi-size
+  ICO, 16/32 px PNGs and an Apple touch icon. The source image and generation prompt
+  are kept in `design/`.
 
 Everything lives inside this folder; no external runtime dependencies or CDNs.
 
@@ -92,4 +100,7 @@ Enhancements stay within that original experience:
 
 Research and implementation notes are in [ENHANCEMENTS.md](ENHANCEMENTS.md). The original star-film/image assets remain archived in `public/assets/` and are not part of the active universe.
 
-The production build and simulated-DOM/real Three.js geometry checks pass. Browser visual review remains incomplete because of the app's saved browser permission denial.
+The production build and adaptive-contrast tests pass. Browser checks cover desktop
+and mobile layouts, dark galaxies, the bright Big Bang, first light, and reduced
+motion. Adaptive ink follows the finished frame rather than an authored brightness
+estimate.

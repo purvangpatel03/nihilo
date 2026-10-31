@@ -5,6 +5,7 @@
   "type": "module",
   "description": "EX NIHILO — a scroll-driven cinematic journey through the birth of the universe.",
   "scripts": {
+    "test": "node --test",
     "dev": "vite --host --port 5173",
     "build": "vite build",
     "preview": "vite preview --host --port 5173",

@@ -86,14 +86,6 @@ export default class Cosmos {
       { p: 0.81, v: 0.9 }, { p: 0.92, v: 0.7 }, { p: 1.0, v: 0.6 },
     ];
 
-    // Estimated screen brightness (0 = black void, 1 = white) so the HUD/narration
-    // text can flip light↔dark and stay legible over bright scenes.
-    this.lumKeys = [
-      { p: 0.0, v: 0.05 }, { p: 0.2, v: 0.14 }, { p: 0.27, v: 0.26 }, { p: 0.34, v: 0.1 },
-      { p: 0.45, v: 0.16 }, { p: 0.5, v: 0.6 }, { p: 0.55, v: 0.44 }, { p: 0.6, v: 0.14 },
-      { p: 0.69, v: 0.12 }, { p: 0.85, v: 0.16 }, { p: 0.92, v: 0.34 }, { p: 0.97, v: 0.44 }, { p: 1.0, v: 0.36 },
-    ];
-
     this.bgKeys = [
       { p: 0.0, c: new THREE.Color('#050308') },
       { p: 0.16, c: new THREE.Color('#0a0512') },
@@ -143,9 +135,6 @@ export default class Cosmos {
 
     // proximity to the detonation (for flash / shake / chroma)
     const bangProx = Math.exp(-Math.pow((p - BANG_AT) * 68, 2));
-
-    // background brightness estimate for adaptive text contrast
-    this.bgLum = Math.min(1, Math.max(kf(this.lumKeys, p), bangProx));
 
     // ---- scenes ----
     for (const e of this.entries) {

@@ -1,5 +1,5 @@
 import { ACTS, BEATS, CAPTIONS, clockFor, actAt } from '../core/Timeline.js';
-import { window01, clamp, lerp, smoothstep, damp } from '../lib/math.js';
+import { window01, clamp } from '../lib/math.js';
 
 // Owns every pixel of DOM chrome: the entry veil, the instrument HUD,
 // the narration beats, the mute control, the scroll cue and the loop-back.
@@ -20,8 +20,8 @@ export default class Interface {
     this._lastEpoch = '';
     this._lastAct = '';
     this._started = false;
-    this._lumDisp = 0.05; // smoothed background brightness for text contrast
-    this._rootStyle = document.documentElement.style;
+    this._progress = 0;
+    this._cueReady = false;
 
     this._buildActLabel();
     this._buildBeats();
@@ -124,26 +124,13 @@ export default class Interface {
     this.hud.inert = false;
     // let the first breath land, then invite the scroll
     setTimeout(() => {
-      if (this._started) this.cue.dataset.on = 'true';
+      this._cueReady = true;
+      if (this._started) this.cue.dataset.on = String(this._progress < 0.012);
     }, 2600);
   }
 
-  // Adaptive text contrast: as the scene brightens (Big-Bang flash, first
-  // light, the final beam) the chrome fades from light ink to dark ink so it
-  // never disappears against a white background. Smoothed for a soft cross-fade.
-  setBgLuminance(lum, dt = 0.016) {
-    this._lumDisp = damp(this._lumDisp, lum ?? 0.05, 9, dt);
-    const t = smoothstep(0.4, 0.62, this._lumDisp);
-    const r = Math.round(lerp(244, 10, t));
-    const g = Math.round(lerp(238, 9, t));
-    const b = Math.round(lerp(251, 18, t));
-    const s = this._rootStyle;
-    s.setProperty('--ink', `rgb(${r},${g},${b})`);
-    s.setProperty('--ink-dim', `rgba(${r},${g},${b},0.62)`);
-    s.setProperty('--ink-faint', `rgba(${r},${g},${b},0.34)`);
-  }
-
   update(p) {
+    this._progress = p;
     // clock
     const { value, epoch } = clockFor(p);
     if (value !== this._lastClock) {
@@ -205,7 +192,7 @@ export default class Interface {
 
     // scroll cue: only while at the very start
     if (this._started) {
-      this.cue.dataset.on = String(p < 0.012 && this.cue.dataset.on !== undefined);
+      this.cue.dataset.on = String(p < 0.012 && this._cueReady);
     }
 
     // loop-back appears at the resolution
