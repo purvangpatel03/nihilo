@@ -57,6 +57,19 @@ export default class Interface {
         <p class="beat__line">${b.line}</p>
         ${b.sub ? `<p class="beat__sub">${b.sub}</p>` : ''}
       `;
+      const line = el.querySelector('.beat__line');
+      const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+      let wordIndex = 0;
+      textNodes.forEach(node => {
+        const frag = document.createDocumentFragment();
+        node.textContent.split(/(\s+)/).forEach(text => {
+          if (!text.trim()) frag.append(document.createTextNode(text));
+          else { const span = document.createElement('span'); span.className = 'beat__word'; span.textContent = text; span.dataset.word = wordIndex++; frag.append(span); }
+        });
+        node.replaceWith(frag);
+      });
       this.narration.appendChild(el);
       return el;
     });
@@ -106,7 +119,9 @@ export default class Interface {
   begin() {
     this._started = true;
     this.veil.dataset.gone = 'true';
+    this.veil.inert = true;
     this.hud.dataset.hidden = 'false';
+    this.hud.inert = false;
     // let the first breath land, then invite the scroll
     setTimeout(() => {
       if (this._started) this.cue.dataset.on = 'true';
@@ -161,8 +176,15 @@ export default class Interface {
       }
       el.style.visibility = 'visible';
       const inv = 1 - a;
-      el.style.filter = `blur(${(inv * 7).toFixed(2)}px)`;
+      el.style.filter = 'none';
       el.style.transform = `translateY(${(inv * 12).toFixed(2)}px) scale(${(0.985 + a * 0.015).toFixed(4)})`;
+      const reduce = document.documentElement.dataset.motion === 'reduced';
+      el.querySelectorAll('.beat__word').forEach((word, j) => {
+        const reveal = reduce ? 1 : clamp((p - b.start - j * .0005) / .009, 0, 1);
+        word.style.opacity = reveal.toFixed(3);
+        word.style.transform = `translate3d(0,${(1-reveal)*30}px,0) rotateX(${(1-reveal)*-65}deg)`;
+        word.style.filter = reduce ? 'none' : `blur(${(1-reveal)*5}px)`;
+      });
     }
 
     // physics caption layer (documentary voice, above the poetic beats)
@@ -189,5 +211,7 @@ export default class Interface {
     // loop-back appears at the resolution
     const loopA = clamp(window01(p, 0.965, 1.001, 0.02) + (p > 0.995 ? 1 : 0), 0, 1);
     this.loop.dataset.on = String(loopA > 0.2);
+    this.loop.tabIndex = loopA > 0.2 ? 0 : -1;
+    this.loop.setAttribute('aria-hidden', String(loopA <= 0.2));
   }
 }

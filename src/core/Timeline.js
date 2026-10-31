@@ -46,7 +46,7 @@ export function clockFor(p) {
     case 'void':
       return { value: 't = 0', epoch: 'the quantum dark' };
     case 'bang': {
-      const exp = Math.round(lerp(-43, -12, t));
+      const exp = Math.round(lerp(-43, -36, t));
       return { value: `t = 10${sup(exp)} s`, epoch: 'the first instant' };
     }
     case 'inflation': {
@@ -162,7 +162,7 @@ export const BEATS = [
     end: 0.91,
     kicker: 'ix',
     line: 'And even galaxies<br>fall toward one another.',
-    sub: 'a collision ten billion years wide',
+    sub: 'a gravitational dance across billions of years',
     align: 'low',
   },
   {
@@ -178,7 +178,7 @@ export const BEATS = [
 // A quieter documentary layer that runs above the poetic beats — the actual
 // physics of each epoch, so the scroll teaches as well as moves.
 export const CAPTIONS = [
-  { start: 0.015, end: 0.1, text: 'a region smaller than an atom · holding all the energy there will ever be' },
+  { start: 0.015, end: 0.1, text: 'an imagined threshold · the earliest universe is still an open question' },
   { start: 0.205, end: 0.305, text: 'inflation · in 10⁻³² s space swells by a factor of 10²⁶' },
   { start: 0.335, end: 0.405, text: 'a plasma of quarks and gluons cools · they bind into protons and neutrons' },
   { start: 0.405, end: 0.455, text: 'nucleosynthesis · the first nuclei — three-quarters hydrogen, one-quarter helium' },

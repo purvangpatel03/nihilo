@@ -293,6 +293,6 @@ export default class Collision extends SceneBase {
     cu.uFrame.value = u.uFrame.value;
     cu.uStarburst.value = burst;
     cu.uFade.value = fade;
-    this.group.rotation.y = time * 0.02;
+    this.group.rotation.y = (local - .5) * .35;
   }
 }

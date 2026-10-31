@@ -12,6 +12,7 @@ import Galaxy from './scenes/Galaxy.js';
 import Collision from './scenes/Collision.js';
 import Resolution from './scenes/Resolution.js';
 import Starfield from './scenes/Starfield.js';
+import CosmicWeb from './CosmicWeb.js';
 
 const act = (id) => ACTS.find((a) => a.id === id);
 
@@ -65,6 +66,8 @@ export default class Cosmos {
 
     for (const e of this.entries) this.root.add(e.s.group);
     this.root.add(this.starfield.group);
+    this.web = new CosmicWeb();
+    this.root.add(this.web.group);
 
     // Camera choreography (z distance + slight elevation).
     this.camZ = [
@@ -129,6 +132,7 @@ export default class Cosmos {
 
   update(p, time, dt) {
     const exp = this.exp;
+    this.web.update(p, time, exp.reducedMotion);
 
     // ---- audio + visual bang trigger ----
     if (p < BANG_AT - 0.04) this._bangFired = false;
@@ -175,24 +179,31 @@ export default class Cosmos {
 
     // ---- grade pass (flash / chroma / exposure) ----
     const g = exp.gradePass.uniforms;
-    g.uFlash.value = bangProx * 1.25;
+    g.uFlash.value = bangProx * (exp.reducedMotion ? 0.15 : .88);
     const collision = window01(p, 0.81, 0.92, 0.03);
-    g.uChroma.value = 0.0007 + bangProx * 0.006 + collision * 0.0022;
+    g.uChroma.value = exp.reducedMotion ? 0 : 0.0007 + bangProx * 0.004 + collision * 0.0015;
     g.uExposure.value = 1.0 + bangProx * 0.15;
 
     // ---- camera ----
     const z = kf(this.camZ, p);
     const y = kf(this.camY, p);
-    const px = exp.pointer.x;
-    const py = exp.pointer.y;
+    const px = exp.reducedMotion ? 0 : exp.pointer.x;
+    const py = exp.reducedMotion ? 0 : exp.pointer.y;
     const parallax = clamp(z * 0.02, 0.25, 3.2);
 
     // shake at the bang
-    const shake = bangProx * 1.4;
+    const shake = exp.reducedMotion ? 0 : bangProx * .55;
     const sx = Math.sin(time * 63.0) * shake;
     const sy = Math.cos(time * 57.0) * shake;
 
-    exp.camera.position.set(px * parallax + sx, y + py * parallax + sy, z);
+    const encounter = smoothstep(.81, .86, p) * (1 - smoothstep(.89, .93, p));
+    const orbit = Math.sin((p - .81) / .11 * Math.PI) * encounter;
+    exp.camera.position.set(px * parallax + sx + orbit * 13, y + py * parallax + sy + encounter * 4, z + encounter * 6);
+    const fieldOfView = 55 + smoothstep(.2, .26, p) * (1 - smoothstep(.27, .33, p)) * 12 - encounter * 4;
+    if (Math.abs(exp.camera.fov - fieldOfView) > .01) {
+      exp.camera.fov = fieldOfView;
+      exp.camera.updateProjectionMatrix();
+    }
     this._camTarget.set(px * parallax * 0.4, y * 0.35 + py * parallax * 0.4, 0);
     exp.camera.lookAt(this._camTarget);
   }

@@ -34,9 +34,16 @@ export default class Scroll {
     this._enabled = true;
   }
 
+  seek(value, immediate = false) {
+    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    this.target = clamp(value, 0, 1);
+    window.scrollTo({ top: this.target * max, behavior: 'instant' });
+    if (immediate || this.reduced) this.progress = this.target;
+  }
+
   // Programmatic reset to top (used by the "scroll again" loop).
   reset() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.seek(0, this.reduced);
   }
 
   // Instant reset — used at "Begin" so the journey always opens at t = 0,
@@ -51,7 +58,7 @@ export default class Scroll {
   update(dt) {
     const prev = this.progress;
     // Lerp for that heavy, filmic scroll feel.
-    this.progress = damp(this.progress, this.target, 5.5, dt);
+    this.progress = this.reduced ? this.target : damp(this.progress, this.target, 5.5, dt);
     this.velocity = dt > 0 ? (this.progress - prev) / dt : 0;
     return this.progress;
   }
